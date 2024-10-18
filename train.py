@@ -7,9 +7,7 @@ from tqdm import tqdm
 
 from mario.level_utils import one_hot_to_ascii_level, token_to_group
 from mario.tokens import TOKEN_GROUPS as MARIO_TOKEN_GROUPS
-from mariokart.tokens import TOKEN_GROUPS as MARIOKART_TOKEN_GROUPS
 from mario.special_mario_downsampling import special_mario_downsampling
-from mariokart.special_mariokart_downsampling import special_mariokart_downsampling
 from models import init_models, reset_grads, restore_weights
 from models.generator import Level_GeneratorConcatSkip2CleanAdd
 from train_single_scale import train_single_scale
@@ -45,9 +43,6 @@ def train(real, opt):
     stop_scale = len(reals)
     opt.stop_scale = stop_scale
 
-    # Log the original input level as an image
-    img = opt.ImgGen.render(one_hot_to_ascii_level(real, opt.token_list))
-    wandb.log({"real": wandb.Image(img)}, commit=False)
     os.makedirs("%s/state_dicts" % (opt.out_), exist_ok=True)
 
     # Training Loop
