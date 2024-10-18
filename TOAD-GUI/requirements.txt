@@ -1,0 +1,4 @@
+Pillow
+py4j
+numpy
+torch
