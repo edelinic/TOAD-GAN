@@ -14,7 +14,6 @@ from draw_concat import draw_concat
 from generate_noise import generate_spatial_noise
 from mario.level_utils import group_to_token, one_hot_to_ascii_level, token_to_group
 from mario.tokens import TOKEN_GROUPS as MARIO_TOKEN_GROUPS
-from mariokart.tokens import TOKEN_GROUPS as MARIOKART_TOKEN_GROUPS
 from models import calc_gradient_penalty, save_networks
 
 
@@ -173,29 +172,6 @@ def train_single_scale(D, G, reals, generators, noise_maps, input_from_prev_scal
             wandb.log({f"noise_amplitude@{current_scale}": opt.noise_amp,
                        f"rec_loss@{current_scale}": rec_loss.item()},
                       step=step, sync=False, commit=True)
-
-        # Rendering and logging images of levels
-        if epoch % 500 == 0 or epoch == (opt.niter - 1):
-            if opt.token_insert >= 0 and opt.nc_current == len(token_group):
-                token_list = [list(group.keys())[0] for group in token_group]
-            else:
-                token_list = opt.token_list
-
-            img = opt.ImgGen.render(one_hot_to_ascii_level(fake.detach(), token_list))
-            img2 = opt.ImgGen.render(one_hot_to_ascii_level(
-                G(Z_opt.detach(), z_prev, temperature=1 if current_scale != opt.token_insert else 1).detach(),
-                token_list))
-            real_scaled = one_hot_to_ascii_level(real.detach(), token_list)
-            img3 = opt.ImgGen.render(real_scaled)
-            wandb.log({f"G(z)@{current_scale}": wandb.Image(img),
-                       f"G(z_opt)@{current_scale}": wandb.Image(img2),
-                       f"real@{current_scale}": wandb.Image(img3)},
-                      sync=False, commit=False)
-
-            real_scaled_path = os.path.join(wandb.run.dir, f"real@{current_scale}.txt")
-            with open(real_scaled_path, "w") as f:
-                f.writelines(real_scaled)
-            wandb.save(real_scaled_path)
 
         # Learning Rate scheduler step
         schedulerD.step()
